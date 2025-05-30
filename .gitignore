@@ -1,0 +1,14 @@
+# Demo generated files
+
+# Vault Enterprise License
+*.hclic
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+/tmp/
+
+# IDE files
+.vscode/
