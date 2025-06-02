@@ -72,6 +72,18 @@ fi
 echo -e "${GREEN}✅ Vault Enterprise is running and accessible.${NC}"
 echo
 
+# Activate Secret Sync feature
+echo -e "${YELLOW}Activating Vault Secret Sync feature...${NC}"
+echo -e "${BLUE}Enabling Secret Sync (this may impact license usage)...${NC}"
+if vault write -f sys/activation-flags/secrets-sync/activate &> /dev/null; then
+    echo -e "${GREEN}✅ Secret Sync feature activated successfully${NC}"
+else
+    echo -e "${RED}❌ Failed to activate Secret Sync feature${NC}"
+    echo -e "${BLUE}   This may be due to license limitations or insufficient permissions${NC}"
+    exit 1
+fi
+echo
+
 # Check AWS credentials
 echo -e "${YELLOW}Verifying AWS credentials...${NC}"
 if ! aws sts get-caller-identity &> /dev/null; then

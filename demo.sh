@@ -105,6 +105,25 @@ fi
 show_success "All prerequisites satisfied"
 pause_demo
 
+# Ensure Secret Sync is activated
+show_step "Verifying Secret Sync Feature"
+show_info "Checking if Secret Sync is activated on this Vault instance..."
+
+if vault read sys/activation-flags/secrets-sync &> /dev/null; then
+    show_success "Secret Sync feature is already activated"
+else
+    show_info "Activating Secret Sync feature..."
+    if vault write -f sys/activation-flags/secrets-sync/activate &> /dev/null; then
+        show_success "Secret Sync feature activated successfully"
+    else
+        echo -e "${RED}❌ Failed to activate Secret Sync feature${NC}"
+        echo -e "${BLUE}   Please ensure you have a valid Vault Enterprise license${NC}"
+        echo -e "${BLUE}   and run: vault write -f sys/activation-flags/secrets-sync/activate${NC}"
+        exit 1
+    fi
+fi
+pause_demo
+
 # Step 1: Show current Vault secret
 show_section "Step 1: Examining Our Vault Secret"
 show_info "Let's start by looking at the secret we have stored in Vault's KV v2 engine."
@@ -132,6 +151,17 @@ show_section "Step 3: Creating Secret Association"
 show_info "Now we'll associate our Vault secret with the AWS destination."
 show_info "This tells Vault which secrets should be synchronized and where."
 
+# Verify the secret exists first
+show_info "Verifying secret exists before creating association..."
+if ! vault kv get "$KV_MOUNT_PATH/$SECRET_NAME" &> /dev/null; then
+    echo -e "${RED}❌ Secret $KV_MOUNT_PATH/$SECRET_NAME does not exist${NC}"
+    echo -e "${BLUE}   Creating secret first...${NC}"
+    vault kv put "$KV_MOUNT_PATH/$SECRET_NAME" \
+        username="temp-user" \
+        password="temp-password"
+fi
+
+# Create the association using the correct path format
 execute_command "vault write sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations/set \\
   mount=\"$KV_MOUNT_PATH\" \\
   secret_name=\"$SECRET_NAME\""
@@ -139,24 +169,27 @@ execute_command "vault write sys/sync/destinations/aws-sm/$SYNC_DESTINATION/asso
 show_success "Secret association created - sync should begin automatically"
 show_info "Vault will now automatically create this secret in AWS Secrets Manager."
 echo
-show_info "Let's wait a few seconds for the initial sync to complete..."
-sleep 5
+show_info "Let's wait for the initial sync to complete..."
+sleep 10
 pause_demo
 
 # Step 4: Verify Secret in AWS
 show_section "Step 4: Verifying Secret in AWS Secrets Manager"
 show_info "Let's check that our secret has been created in AWS Secrets Manager."
 
-echo -e "${BLUE}Listing secrets in AWS Secrets Manager:${NC}"
-execute_command "aws secretsmanager list-secrets --region $AWS_REGION --query 'SecretList[?contains(Name, \`vault-kv\`)].{Name:Name,Description:Description}' --output table"
+echo -e "${BLUE}Listing secrets in AWS Secrets Manager that start with 'vault':${NC}"
+execute_command "aws secretsmanager list-secrets --region $AWS_REGION --output json | jq '.SecretList[] | select(.Name | startswith(\"vault\")) | {Name: .Name, Description: .Description}'"
 
-EXPECTED_SECRET_NAME="vault-kv_${KV_MOUNT_PATH}-${SECRET_NAME}"
-show_info "Our secret should appear as: $EXPECTED_SECRET_NAME"
+# Get the mount accessor to build the correct secret name
+MOUNT_ACCESSOR=$(vault read -format=json sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations | jq -r '.data.associated_secrets | to_entries[0].value.accessor')
+AWS_SECRET_NAME="vault/${MOUNT_ACCESSOR}/${SECRET_NAME}"
+
+show_info "Based on Vault's mount accessor, the secret in AWS should be named: $AWS_SECRET_NAME"
 echo
 
 echo -e "${BLUE}Retrieving the secret value from AWS:${NC}"
 execute_command "aws secretsmanager get-secret-value \\
-  --secret-id \"$EXPECTED_SECRET_NAME\" \\
+  --secret-id \"$AWS_SECRET_NAME\" \\
   --region $AWS_REGION \\
   --query 'SecretString' \\
   --output text | jq ."
@@ -185,7 +218,7 @@ sleep 8
 
 echo -e "${BLUE}Checking the updated secret in AWS Secrets Manager:${NC}"
 execute_command "aws secretsmanager get-secret-value \\
-  --secret-id \"$EXPECTED_SECRET_NAME\" \\
+  --secret-id \"$AWS_SECRET_NAME\" \\
   --region $AWS_REGION \\
   --query 'SecretString' \\
   --output text | jq ."
@@ -200,8 +233,8 @@ show_info "Vault provides detailed information about sync operations."
 echo -e "${BLUE}Checking sync destination status:${NC}"
 execute_command "vault read sys/sync/destinations/aws-sm/$SYNC_DESTINATION"
 
-echo -e "${BLUE}Checking association status:${NC}"
-execute_command "vault read sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations/$KV_MOUNT_PATH/$SECRET_NAME"
+echo -e "${BLUE}Checking all associations for this destination:${NC}"
+execute_command "vault read sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations"
 
 pause_demo
 
@@ -210,20 +243,18 @@ show_section "Step 7: How Applications Would Use This"
 show_info "Applications can now retrieve secrets using standard AWS SDK calls."
 show_info "Here's what the application code would look like:"
 
-cat << 'EOF'
+cat << EOF
 
 # Python Example using boto3
 import boto3
 import json
 
-def get_database_credentials():
+def get_database_credentials(secret_name='$AWS_SECRET_NAME'):
     """Retrieve database credentials from AWS Secrets Manager"""
     client = boto3.client('secretsmanager', region_name='us-east-1')
     
     try:
-        response = client.get_secret_value(
-            SecretId='vault-kv_demo-secrets-database'
-        )
+        response = client.get_secret_value(SecretId=secret_name)
         secret = json.loads(response['SecretString'])
         return {
             'username': secret['username'],
@@ -242,6 +273,7 @@ EOF
 
 show_info "The application doesn't know or care that the secret comes from Vault!"
 show_info "It uses standard AWS APIs, while you get centralized management in Vault."
+show_info "In production, you'd typically store the secret name as an environment variable."
 pause_demo
 
 # Step 8: Key Benefits Summary

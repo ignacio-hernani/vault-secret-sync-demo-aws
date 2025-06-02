@@ -2,7 +2,7 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "VaultSecretSyncSecretsManager",
+      "Sid": "VaultSecretSyncPermissions",
       "Effect": "Allow",
       "Action": [
         "secretsmanager:CreateSecret",
@@ -12,19 +12,7 @@
         "secretsmanager:GetSecretValue",
         "secretsmanager:PutSecretValue",
         "secretsmanager:TagResource",
-        "secretsmanager:UntagResource"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": {
-          "secretsmanager:ResourceTag/ManagedBy": "HashiCorp-Vault"
-        }
-      }
-    },
-    {
-      "Sid": "VaultSecretSyncSecretsManagerList",
-      "Effect": "Allow",
-      "Action": [
+        "secretsmanager:UntagResource",
         "secretsmanager:ListSecrets"
       ],
       "Resource": "*"

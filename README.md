@@ -82,7 +82,12 @@ vault status
 
 # Verify enterprise features are available
 vault read sys/license/status
+
+# Activate Secret Sync feature (required for Vault 1.16+)
+vault write -f sys/activation-flags/secrets-sync/activate
 ```
+
+**Important**: Secret Sync must be explicitly activated on Vault Enterprise instances. This command enables the feature but may impact your license usage.
 
 ### Step 2: AWS IAM Configuration
 
@@ -149,12 +154,13 @@ Check that your secret appears in AWS Secrets Manager:
 
 ```bash
 # List secrets in AWS Secrets Manager
-aws secretsmanager list-secrets --region us-east-1
+aws secretsmanager list-secrets --region us-east-1 --query 'SecretList[?starts_with(Name, `vault`)]'
 
-# Retrieve the synced secret value
-aws secretsmanager get-secret-value \
-  --secret-id "vault-kv_demo-secrets-database" \
-  --region us-east-1
+# The secret will be named like: vault/kv_ACCESSOR/database 
+# where kv_ACCESSOR is the mount accessor (e.g., kv_e5d814f5)
+
+# Retrieve the synced secret value (replace kv_ACCESSOR with actual accessor)
+aws secretsmanager get-secret-value --secret-id "vault/kv_ACCESSOR/database" --region us-east-1
 ```
 
 ### Step 7: Demonstrate Secret Rotation

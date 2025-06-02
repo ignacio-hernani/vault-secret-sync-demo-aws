@@ -82,6 +82,29 @@ docker info
    vault read sys/license/status
    ```
 
+### Secret Sync Feature Not Activated
+```
+❌ the Secrets Sync feature is not activated on this Vault instance
+```
+
+**Solutions**:
+1. Activate the Secret Sync feature:
+   ```bash
+   vault write -f sys/activation-flags/secrets-sync/activate
+   ```
+
+2. Verify activation was successful:
+   ```bash
+   vault read sys/activation-flags/secrets-sync
+   ```
+
+3. Check if your license supports Secret Sync:
+   ```bash
+   vault read sys/license/status
+   ```
+
+**Note**: Secret Sync activation may impact your Vault Enterprise license usage. This is a normal requirement for Vault 1.16+.
+
 ## AWS Credential Issues
 
 ### AWS Credentials Not Configured
@@ -149,6 +172,29 @@ docker info
    ```bash
    docker logs vault-enterprise | grep -i sync
    ```
+
+5. **Debug step-by-step**:
+   ```bash
+   # Check if destination exists
+   vault list sys/sync/destinations/aws-sm/
+   
+   # Check if associations exist
+   vault list sys/sync/destinations/aws-sm/demo-aws/associations/
+   
+   # Test AWS connectivity
+   aws secretsmanager list-secrets --region us-east-1 --max-results 1
+   
+   # Check for the secret in AWS (may take several minutes)
+   aws secretsmanager describe-secret --secret-id "vault/kv_ACCESSOR/database"
+   
+   # Replace kv_ACCESSOR with your actual mount accessor from:
+   vault read sys/sync/destinations/aws-sm/demo-aws/associations
+   ```
+
+6. **Common timing issues**:
+   - Initial sync: 30-60 seconds
+   - Complex secrets: Up to 2-3 minutes
+   - Network issues: Can cause longer delays
 
 ### Secret Updates Not Syncing
 **Symptoms**: Changes to secrets in Vault don't reflect in AWS.
