@@ -127,7 +127,7 @@ if [ "$SKIP_AWS" = false ]; then
     
     # Find and remove synced secrets from AWS Secrets Manager
     echo -e "${BLUE}Searching for synced secrets in AWS Secrets Manager...${NC}"
-    VAULT_SECRETS=$(aws secretsmanager list-secrets --region "$AWS_REGION" --query 'SecretList[?contains(Name, `vault-kv`)].Name' --output text)
+    VAULT_SECRETS=$(aws secretsmanager list-secrets --region "$AWS_REGION" --query 'SecretList[?starts_with(Name, `vault/`)].Name' --output text)
     
     if [ -n "$VAULT_SECRETS" ]; then
         echo -e "${BLUE}Found the following Vault-synced secrets:${NC}"
@@ -178,6 +178,20 @@ if [ "$SKIP_AWS" = false ]; then
     # Remove IAM policy
     if aws iam get-policy --policy-arn "arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY_NAME" &> /dev/null; then
         echo -e "${BLUE}Deleting IAM policy...${NC}"
+        
+        # First, get all policy versions
+        POLICY_VERSIONS=$(aws iam list-policy-versions --policy-arn "arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY_NAME" --query 'Versions[?IsDefaultVersion==`false`].VersionId' --output text)
+        
+        # Delete all non-default versions first
+        if [ -n "$POLICY_VERSIONS" ]; then
+            echo -e "${BLUE}   Deleting non-default policy versions...${NC}"
+            for version in $POLICY_VERSIONS; do
+                aws iam delete-policy-version --policy-arn "arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY_NAME" --version-id "$version"
+                echo -e "${GREEN}   ✅ Policy version $version deleted${NC}"
+            done
+        fi
+        
+        # Now delete the policy itself (which will delete the default version)
         aws iam delete-policy --policy-arn "arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY_NAME"
         echo -e "${GREEN}✅ IAM policy deleted${NC}"
     else
