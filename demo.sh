@@ -198,18 +198,38 @@ show_success "Secret successfully synchronized to AWS Secrets Manager!"
 pause_demo
 
 # Step 5: Demonstrate Secret Rotation
-show_section "Step 5: Demonstrating Automatic Secret Rotation"
+show_section "Step 5: Demonstrating Interactive Secret Updates"
 show_info "Now let's demonstrate the power of Secret Sync by updating our secret in Vault."
-show_info "Watch how the change automatically propagates to AWS Secrets Manager."
+show_info "You'll choose a new username, and we'll watch how the change automatically propagates to AWS."
 
-# Generate new credentials
-NEW_USERNAME="app-service-account-$(date +%s)"
-NEW_PASSWORD=$(openssl rand -base64 32 | tr -d '=+/' | cut -c1-25)
+# Get current secret values first
+echo -e "${BLUE}First, let's see the current secret values:${NC}"
+execute_command "vault kv get -format=json $KV_MOUNT_PATH/$SECRET_NAME | jq -r '.data.data'"
 
-echo -e "${BLUE}Updating secret in Vault with new credentials:${NC}"
+# Get current values for preservation
+CURRENT_SECRET=$(vault kv get -format=json "$KV_MOUNT_PATH/$SECRET_NAME" | jq -r '.data.data')
+CURRENT_PASSWORD=$(echo "$CURRENT_SECRET" | jq -r '.password')
+
+echo
+show_info "We'll keep the current password but update the username."
+echo -e "${YELLOW}Current username: $(echo "$CURRENT_SECRET" | jq -r '.username')${NC}"
+echo
+
+# Prompt for new username
+echo -e "${CYAN}Please enter a new username for the database credentials:${NC}"
+read -p "New username: " NEW_USERNAME
+
+# Validate input
+if [ -z "$NEW_USERNAME" ]; then
+    echo -e "${YELLOW}No username provided. Using default: app-service-account-$(date +%s)${NC}"
+    NEW_USERNAME="app-service-account-$(date +%s)"
+fi
+
+echo
+echo -e "${BLUE}Updating secret in Vault with your new username: $NEW_USERNAME${NC}"
 execute_command "vault kv put $KV_MOUNT_PATH/$SECRET_NAME \\
   username=\"$NEW_USERNAME\" \\
-  password=\"$NEW_PASSWORD\" \\
+  password=\"$CURRENT_PASSWORD\" \\
   updated_by=\"vault-secret-sync-demo\" \\
   updated_at=\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
 
@@ -223,7 +243,8 @@ execute_command "aws secretsmanager get-secret-value \\
   --query 'SecretString' \\
   --output text | jq ."
 
-show_success "Secret automatically updated in AWS! This is the power of Secret Sync."
+show_success "Secret automatically updated in AWS with your chosen username!"
+show_info "Notice how only the username changed while the password remained the same."
 pause_demo
 
 # Step 6: Show Sync Status
@@ -238,46 +259,8 @@ execute_command "vault read sys/sync/destinations/aws-sm/$SYNC_DESTINATION/assoc
 
 pause_demo
 
-# Step 7: Application Usage Example
-show_section "Step 7: How Applications Would Use This"
-show_info "Applications can now retrieve secrets using standard AWS SDK calls."
-show_info "Here's what the application code would look like:"
-
-cat << EOF
-
-# Python Example using boto3
-import boto3
-import json
-
-def get_database_credentials(secret_name='$AWS_SECRET_NAME'):
-    """Retrieve database credentials from AWS Secrets Manager"""
-    client = boto3.client('secretsmanager', region_name='us-east-1')
-    
-    try:
-        response = client.get_secret_value(SecretId=secret_name)
-        secret = json.loads(response['SecretString'])
-        return {
-            'username': secret['username'],
-            'password': secret['password']
-        }
-    except Exception as e:
-        print(f"Error retrieving secret: {e}")
-        return None
-
-# Usage
-creds = get_database_credentials()
-if creds:
-    print(f"Connecting to database as: {creds['username']}")
-
-EOF
-
-show_info "The application doesn't know or care that the secret comes from Vault!"
-show_info "It uses standard AWS APIs, while you get centralized management in Vault."
-show_info "In production, you'd typically store the secret name as an environment variable."
-pause_demo
-
-# Step 8: Key Benefits Summary
-show_section "Step 8: Key Benefits of This Architecture"
+# Step 7: Key Benefits Summary
+show_section "Step 7: Key Benefits of This Architecture"
 
 echo -e "${GREEN}🎯 Centralized Secret Management${NC}"
 echo -e "   • All secrets stored and managed in Vault"
