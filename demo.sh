@@ -259,53 +259,25 @@ execute_command "vault read sys/sync/destinations/aws-sm/$SYNC_DESTINATION/assoc
 
 pause_demo
 
-# Step 7: Key Benefits Summary
-show_section "Step 7: Key Benefits of This Architecture"
+# Key Benefits Summary
+show_section "Key Benefits of This Architecture"
 
-echo -e "${GREEN}🎯 Centralized Secret Management${NC}"
 echo -e "   • All secrets stored and managed in Vault"
-echo -e "   • Single source of truth for credentials"
-echo
-
-echo -e "${GREEN}🔄 Automatic Synchronization${NC}"
-echo -e "   • Changes in Vault automatically sync to AWS"
-echo -e "   • No manual intervention required"
-echo
-
-echo -e "${GREEN}🛡️  Enhanced Security${NC}"
+echo -e "   • Single source of truth for credentials across clouds"
 echo -e "   • Comprehensive audit trails in Vault"
 echo -e "   • Consistent security policies across environments"
-echo
-
-echo -e "${GREEN}🚀 Developer Experience${NC}"
-echo -e "   • Applications use familiar AWS SDKs"
-echo -e "   • No changes required to existing application code"
-echo
-
-echo -e "${GREEN}🔧 Operational Benefits${NC}"
 echo -e "   • Automated credential rotation capabilities"
-echo -e "   • Consistent secret management across clouds"
 echo
 
 pause_demo
 
 # Demo Complete
-show_section "Demo Complete!"
+show_section "Demo Complete"
 echo -e "${GREEN}Congratulations! You've successfully demonstrated:${NC}"
 echo -e "${GREEN}✅ Vault Secret Sync configuration${NC}"
 echo -e "${GREEN}✅ Automatic secret synchronization to AWS${NC}"
 echo -e "${GREEN}✅ Real-time secret updates${NC}"
-echo -e "${GREEN}✅ Application integration patterns${NC}"
-echo
-
-echo -e "${YELLOW}Next Steps:${NC}"
-echo -e "${BLUE}• Explore multi-cloud sync (Azure, GCP)${NC}"
-echo -e "${BLUE}• Set up automated credential rotation${NC}"
-echo -e "${BLUE}• Implement this in your development environment${NC}"
-echo -e "${BLUE}• Review Vault Enterprise features for production${NC}"
 echo
 
 echo -e "${CYAN}When you're ready to clean up, run: ${BOLD}./cleanup-demo.sh${NC}"
 echo
-
-show_success "Thank you for exploring HashiCorp Vault Enterprise Secret Sync!" 
