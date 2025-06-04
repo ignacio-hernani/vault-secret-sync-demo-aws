@@ -5,6 +5,9 @@
 
 set -e  # Exit on any error
 
+# Disable AWS CLI pager to prevent script from getting stuck
+export AWS_PAGER=""
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
