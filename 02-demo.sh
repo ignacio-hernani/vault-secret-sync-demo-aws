@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 VAULT_ADDR="${VAULT_ADDR:-http://127.0.0.1:8200}"
 VAULT_TOKEN="${VAULT_TOKEN:-root}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
-KV_MOUNT_PATH="demo-secrets"
+KV_MOUNT_PATH="aws-secrets-sync"
 SECRET_NAME="database"
 SYNC_DESTINATION="demo-aws"
 

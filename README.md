@@ -117,10 +117,10 @@ Enable and configure the KV v2 secret engine:
 
 ```bash
 # Enable KV v2 secret engine
-vault secrets enable -path=demo-secrets kv-v2
+vault secrets enable -path=aws-secrets-sync kv-v2
 
 # Create a sample database credential secret
-vault kv put demo-secrets/database \
+vault kv put aws-secrets-sync/database \
   username="app-service-account" \
   password="$(openssl rand -base64 32)"
 ```
@@ -144,7 +144,7 @@ Associate your Vault secret with the AWS destination:
 ```bash
 # Create the sync association
 vault write sys/sync/destinations/aws-sm/demo-aws/associations/set \
-  mount="demo-secrets" \
+  mount="aws-secrets-sync" \
   secret_name="database"
 ```
 
@@ -169,13 +169,13 @@ Update the secret in Vault and observe automatic sync:
 
 ```bash
 # Rotate the database password
-vault kv put demo-secrets/database \
+vault kv put aws-secrets-sync/database \
   username="app-service-account" \
   password="$(openssl rand -base64 32)"
 
 # Wait a few seconds, then verify the update in AWS
 aws secretsmanager get-secret-value \
-  --secret-id "vault-kv_demo-secrets-database" \
+  --secret-id "vault-kv_aws-secrets-sync-database" \
   --region us-east-1
 ```
 

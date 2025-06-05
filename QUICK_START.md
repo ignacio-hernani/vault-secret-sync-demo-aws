@@ -38,9 +38,9 @@ Get the HashiCorp Vault Enterprise Secret Sync demo running in under 5 minutes.
 | Action | Command |
 |--------|---------|
 | Check Vault status | `vault status` |
-| View secret in Vault | `vault kv get demo-secrets/database` |
+| View secret in Vault | `vault kv get aws-secrets-sync/database` |
 | List AWS secrets | `aws secretsmanager list-secrets` |
-| Get AWS secret value | `aws secretsmanager get-secret-value --secret-id "vault-kv_demo-secrets-database"` |
+| Get AWS secret value | `aws secretsmanager get-secret-value --secret-id "vault-kv_aws-secrets-sync-database"` |
 
 ## Clean Up
 ```bash

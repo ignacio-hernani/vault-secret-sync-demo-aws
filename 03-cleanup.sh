@@ -18,7 +18,7 @@ VAULT_TOKEN="${VAULT_TOKEN:-root}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 IAM_USER_NAME="vault-secret-sync"
 IAM_POLICY_NAME="VaultSecretSyncPolicy"
-KV_MOUNT_PATH="demo-secrets"
+KV_MOUNT_PATH="aws-secrets-sync"
 SECRET_NAME="database"
 SYNC_DESTINATION="demo-aws"
 

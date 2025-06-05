@@ -165,7 +165,7 @@ docker info
 
 3. Check association status:
    ```bash
-   vault read sys/sync/destinations/aws-sm/demo-aws/associations/demo-secrets/database
+   vault read sys/sync/destinations/aws-sm/demo-aws/associations/aws-secrets-sync/database
    ```
 
 4. Look for errors in Vault logs:
@@ -202,7 +202,7 @@ docker info
 **Solutions**:
 1. Verify the secret was updated in Vault:
    ```bash
-   vault kv get demo-secrets/database
+   vault kv get aws-secrets-sync/database
    ```
 
 2. Check if association is still active:
@@ -213,11 +213,11 @@ docker info
 3. Recreate association if necessary:
    ```bash
    vault write sys/sync/destinations/aws-sm/demo-aws/associations/remove \
-     mount="demo-secrets" \
+     mount="aws-secrets-sync" \
      secret_name="database"
    
    vault write sys/sync/destinations/aws-sm/demo-aws/associations/set \
-     mount="demo-secrets" \
+     mount="aws-secrets-sync" \
      secret_name="database"
    ```
 
@@ -267,11 +267,11 @@ docker info
    ```bash
    # Remove Vault associations
    vault write sys/sync/destinations/aws-sm/demo-aws/associations/remove \
-     mount="demo-secrets" secret_name="database"
+     mount="aws-secrets-sync" secret_name="database"
    
    # Remove AWS secrets
    aws secretsmanager delete-secret \
-     --secret-id "vault-kv_demo-secrets-database" \
+     --secret-id "vault-kv_aws-secrets-sync-database" \
      --force-delete-without-recovery
    
    # Remove IAM user
