@@ -35,11 +35,10 @@ echo -e "${BLUE}   • AWS Secrets Manager secrets${NC}"
 echo -e "${BLUE}   • AWS IAM user and policy${NC}"
 echo
 echo -e "${RED}This action cannot be undone!${NC}"
-echo -n "Are you sure you want to continue? (yes/no): "
-read -r confirmation
-
-if [ "$confirmation" != "yes" ]; then
-    echo -e "${YELLOW}Cleanup cancelled.${NC}"
+read -p "Are you sure you want to continue? (y/N): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cleanup operation cancelled."
     exit 0
 fi
 
