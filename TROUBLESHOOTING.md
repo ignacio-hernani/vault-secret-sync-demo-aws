@@ -148,7 +148,7 @@ docker info
 
 3. Re-run setup if policy is missing:
    ```bash
-   ./setup-demo.sh
+   ./01-setup.sh
    ```
 
 ## Secret Sync Issues
@@ -260,7 +260,7 @@ docker info
 **Solutions**:
 1. Run cleanup with verbose output:
    ```bash
-   bash -x ./cleanup-demo.sh
+   bash -x ./03-cleanup.sh
    ```
 
 2. Manually clean specific resources:
@@ -301,12 +301,12 @@ docker info
 
 ### Script Permissions
 ```
-❌ Permission denied: ./setup-demo.sh
+❌ Permission denied: ./01-setup.sh
 ```
 
 **Solution**: Make scripts executable:
 ```bash
-chmod +x setup-demo.sh demo.sh cleanup-demo.sh
+chmod +x 01-setup.sh 02-demo.sh 03-cleanup.sh
 ```
 
 ## Advanced Troubleshooting
@@ -367,12 +367,12 @@ If all else fails, perform a complete environment reset:
 docker stop vault-enterprise
 
 # Clean up all demo resources
-./cleanup-demo.sh
+./03-cleanup.sh
 
 # Remove Docker containers and images
 docker system prune -f
 
 # Restart from scratch
 ./vault.sh
-./setup-demo.sh
+./01-setup.sh
 ``` 

@@ -97,7 +97,7 @@ else
     AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
     
     if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-        echo -e "${RED}❌ AWS credentials not found. Please run setup-demo.sh first.${NC}"
+        echo -e "${RED}❌ AWS credentials not found. Please run 01-setup.sh first.${NC}"
         exit 1
     fi
 fi
@@ -279,5 +279,5 @@ echo -e "${GREEN}✅ Automatic secret synchronization to AWS${NC}"
 echo -e "${GREEN}✅ Real-time secret updates${NC}"
 echo
 
-echo -e "${CYAN}When you're ready to clean up, run: ${BOLD}./cleanup-demo.sh${NC}"
+echo -e "${CYAN}When you're ready to clean up, run: ${BOLD}./03-cleanup.sh${NC}"
 echo

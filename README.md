@@ -61,13 +61,13 @@ For an automated experience, use our provided scripts:
 
 ```bash
 # 1. Set up the demo environment
-./setup-demo.sh
+./01-setup.sh
 
 # 2. Run the complete demo workflow
-./demo.sh
+./02-demo.sh
 
 # 3. Clean up all resources when finished
-./cleanup-demo.sh
+./03-cleanup.sh
 ```
 
 ## Manual Step-by-Step Guide
@@ -181,9 +181,9 @@ aws secretsmanager get-secret-value \
 
 ## Demo Scripts Explained
 
-- **`setup-demo.sh`**: Automates AWS IAM setup and Vault configuration
-- **`demo.sh`**: Runs the complete demo workflow with explanatory output
-- **`cleanup-demo.sh`**: Removes all demo resources from both Vault and AWS
+- **`01-setup.sh`**: Automates AWS IAM setup and Vault configuration
+- **`02-demo.sh`**: Runs the complete demo workflow with explanatory output
+- **`03-cleanup.sh`**: Removes all demo resources from both Vault and AWS
 
 ## Troubleshooting
 

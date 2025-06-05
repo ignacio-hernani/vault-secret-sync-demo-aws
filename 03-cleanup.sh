@@ -241,7 +241,7 @@ echo
 echo -e "${YELLOW}Next steps:${NC}"
 echo -e "${BLUE}• Your Vault Enterprise instance is still running${NC}"
 echo -e "${BLUE}• To stop Vault: docker stop vault-enterprise${NC}"
-echo -e "${BLUE}• To restart the demo: ./setup-demo.sh${NC}"
+echo -e "${BLUE}• To restart the demo: ./01-setup.sh${NC}"
 echo
 
 echo -e "${GREEN}Thank you for exploring HashiCorp Vault Enterprise Secret Sync!${NC}"

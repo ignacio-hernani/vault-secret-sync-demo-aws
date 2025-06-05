@@ -18,12 +18,12 @@ Get the HashiCorp Vault Enterprise Secret Sync demo running in under 5 minutes.
 
 ### 2. Set Up Demo Environment
 ```bash
-./setup-demo.sh
+./01-setup.sh
 ```
 
 ### 3. Run the Demo
 ```bash
-./demo.sh
+./02-demo.sh
 ```
 
 ## What You'll See
@@ -44,7 +44,7 @@ Get the HashiCorp Vault Enterprise Secret Sync demo running in under 5 minutes.
 
 ## Clean Up
 ```bash
-./cleanup-demo.sh
+./03-cleanup.sh
 ```
 
 ## Need Help?

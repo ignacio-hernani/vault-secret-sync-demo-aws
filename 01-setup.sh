@@ -204,8 +204,8 @@ echo -e "${GREEN}✅ Sample secret created${NC}"
 echo
 echo -e "${YELLOW}Next steps:${NC}"
 echo -e "${BLUE}1. Review the AWS credentials in .aws-credentials${NC}"
-echo -e "${BLUE}2. Run the demo: ./demo.sh${NC}"
-echo -e "${BLUE}3. When finished, clean up: ./cleanup-demo.sh${NC}"
+echo -e "${BLUE}2. Run the demo: ./02-demo.sh${NC}"
+echo -e "${BLUE}3. When finished, clean up: ./03-cleanup.sh${NC}"
 echo
 echo -e "${YELLOW}Manual configuration option:${NC}"
 echo -e "${BLUE}If you prefer to configure the sync destination manually, use:${NC}"

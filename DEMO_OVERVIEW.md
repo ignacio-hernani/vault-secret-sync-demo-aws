@@ -11,9 +11,9 @@ This directory contains a modernized HashiCorp Vault Enterprise Secret Sync demo
 | `README.md` | Comprehensive guide with step-by-step instructions |
 | `QUICK_START.md` | 5-minute quick start guide for experienced users |
 | `vault.sh` | Starts Vault Enterprise in Docker (provided) |
-| `setup-demo.sh` | Automated setup script for AWS IAM and Vault configuration |
-| `demo.sh` | Interactive demo script showcasing Secret Sync functionality |
-| `cleanup-demo.sh` | Complete cleanup script for all demo resources |
+| `01-setup.sh` | Automated setup script for AWS IAM and Vault configuration |
+| `02-demo.sh` | Interactive demo script showcasing Secret Sync functionality |
+| `03-cleanup.sh` | Complete cleanup script for all demo resources |
 
 ### Supporting Files
 
@@ -126,15 +126,15 @@ The scripts support several demo modes:
 ### Quick Demo (5 minutes)
 ```bash
 export DEMO_PAUSE=0  # Skip interactive pauses
-./setup-demo.sh && ./demo.sh && ./cleanup-demo.sh
+./01-setup.sh && ./02-demo.sh && ./03-cleanup.sh
 ```
 
 ### Interactive Demo (15-20 minutes)
 ```bash
 # Default mode with explanations and pauses
-./setup-demo.sh
-./demo.sh
-./cleanup-demo.sh
+./01-setup.sh
+./02-demo.sh
+./03-cleanup.sh
 ```
 
 ### Manual Exploration
