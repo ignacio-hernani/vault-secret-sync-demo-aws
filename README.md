@@ -6,7 +6,7 @@ This demo showcases HashiCorp Vault Enterprise's Secret Sync capability, demonst
 
 Vault's Secret Sync feature manages the complete lifecycle of secrets by automatically synchronizing them to external providers like AWS Secrets Manager. Your applications continue using their native cloud provider integrations while benefiting from Vault's centralized secret management, comprehensive audit logging, and automated credential rotation capabilities.
 
-## Architecture Overview
+## Architecture
 
 ```
 ┌─────────────────┐    Secret Sync    ┌──────────────────────┐
