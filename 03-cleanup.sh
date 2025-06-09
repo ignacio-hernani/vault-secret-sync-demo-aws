@@ -71,22 +71,46 @@ echo
 if [ "$SKIP_VAULT" = false ]; then
     echo -e "${YELLOW}Cleaning up Vault Secret Sync...${NC}"
     
-    # Remove secret association
-    if vault read "sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations/$KV_MOUNT_PATH/$SECRET_NAME" &> /dev/null; then
-        echo -e "${BLUE}Removing secret association...${NC}"
-        vault write "sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations/remove" \
-            mount="$KV_MOUNT_PATH" \
-            secret_name="$SECRET_NAME"
-        echo -e "${GREEN}✅ Secret association removed${NC}"
+    # Remove secret associations
+    echo -e "${BLUE}Removing secret associations...${NC}"
+    
+    # Check if destination has associations
+    if vault read "sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations" &> /dev/null; then
+        # Get the actual association details
+        ASSOCIATION_DATA=$(vault read -format=json "sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations" 2>/dev/null)
+        
+        if [ -n "$ASSOCIATION_DATA" ] && [ "$ASSOCIATION_DATA" != "null" ]; then
+            # Extract mount names from associated_secrets
+            MOUNTS=$(echo "$ASSOCIATION_DATA" | jq -r '.data.associated_secrets | keys[]' 2>/dev/null | cut -d'/' -f1 | sort -u)
+            
+            if [ -n "$MOUNTS" ]; then
+                echo -e "${BLUE}Found associations for mounts: $MOUNTS${NC}"
+                for mount in $MOUNTS; do
+                    echo -e "${BLUE}  Removing association for mount: $mount${NC}"
+                    vault write "sys/sync/destinations/aws-sm/$SYNC_DESTINATION/associations/remove" \
+                        mount="$mount" \
+                        secret_name="$SECRET_NAME" &> /dev/null || true
+                done
+                echo -e "${GREEN}✅ Secret associations removed${NC}"
+            else
+                echo -e "${YELLOW}⚠️  No associations found${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠️  No associations found${NC}"
+        fi
     else
-        echo -e "${YELLOW}⚠️  Secret association not found or already removed${NC}"
+        echo -e "${YELLOW}⚠️  No associations endpoint found${NC}"
     fi
     
     # Remove sync destination
     if vault read "sys/sync/destinations/aws-sm/$SYNC_DESTINATION" &> /dev/null; then
         echo -e "${BLUE}Removing sync destination...${NC}"
-        vault delete "sys/sync/destinations/aws-sm/$SYNC_DESTINATION"
-        echo -e "${GREEN}✅ Sync destination removed${NC}"
+        if vault delete "sys/sync/destinations/aws-sm/$SYNC_DESTINATION" 2>/dev/null; then
+            echo -e "${GREEN}✅ Sync destination removed${NC}"
+        else
+            echo -e "${RED}❌ Failed to remove sync destination${NC}"
+            echo -e "${YELLOW}This usually means there are still associations${NC}"
+        fi
     else
         echo -e "${YELLOW}⚠️  Sync destination not found or already removed${NC}"
     fi
